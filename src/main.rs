@@ -1,5 +1,3 @@
-use std::env::current_exe;
-
 fn main() {
     let mut running: bool = true;
 
