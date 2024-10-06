@@ -1,12 +1,20 @@
-fn main() {
-    let mut running = true;
+use std::env::current_exe;
 
-    let mut board = chess::Board::init();
+fn main() {
+    let mut running: bool = true;
+
+    let mut board: chess::Board = chess::Board::init();
+
+    let mut current_turn: bool = true;  // white moves
 
     while running {
-        utils::clear_terminal_window();
+        // print board
+        // utils::clear_terminal_window();
         chess::print_board(&board);
-        utils::input("Enter a move: ");
+
+        // make a move
+        let chess_move = utils::input("Enter a move: ");
+        println!("{}: {}", chess_move.clone(), chess::get_move_information(chess_move, &board, current_turn))
     }
 }
 
@@ -14,7 +22,7 @@ mod chess {
     const WHITE_PIECES: [char; 6] = ['♚', '♛', '♜', '♞', '♝', '♟'];
     const BLACK_PIECES: [char; 6] = ['♔', '♕', '♖', '♘', '♗', '♙'];
 
-
+    // defining main chess types
     #[derive(PartialEq, Eq, Copy, Clone)]
     pub enum PieceType {
         Pawn,
@@ -61,6 +69,21 @@ mod chess {
         }
     }
 
+    struct MoveInfo {
+        valid: bool,
+        en_passant: bool,  // the user info is not a guideline, it is used to compare the actual move notation and 
+        check: bool,
+        capture: bool,
+        castle: bool,
+        castle_type: u8,  // 0 - short, 1 - long
+        promotion: bool,
+        promotion_piece: PieceType,
+        destination_square: String,
+        origin_square: String,  // if the user provided the origin square that is
+        piece_moved: PieceType
+    }
+
+    // printing board
     pub fn print_board(board: &Board){
         println!();
         println!();
@@ -110,6 +133,13 @@ mod chess {
             }
         }
     }
+
+
+    // validating moves
+    pub fn get_move_information(chess_move: String, board: &Board, current_turn: bool) -> bool {
+        return true;
+    }
+
 }
 
 mod utils {
@@ -126,7 +156,7 @@ mod utils {
     
         io::stdin().read_line(&mut ans).expect("Error getting input");
     
-        return ans;
+        return String::from(ans.trim());
     }
 
     pub fn clear_terminal_window() {
