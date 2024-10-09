@@ -7,28 +7,29 @@ fn main() {
 
     while running {
         // print board
-        // utils::clear_terminal_window();
-        // chess::print_board(&board);
+        utils::clear_terminal_window();
+        chess::print_board(&board);
 
         // make a move
         let chess_move: String = utils::input("Enter a move: ");
+
         let move_info: chess::MoveInfo = chess::get_move_information(chess_move, &board, current_turn);
 
         // debugging
-        println!("valid notation: {}", move_info.valid_notation);
-        println!("valid move: {}", move_info.valid_move);
-        println!("en passant: {}", move_info.en_passant);
-        println!("check: {}", move_info.check);
-        println!("mate: {}", move_info.mate);
-        println!("capture: {}", move_info.capture);
-        println!("castle: {}", move_info.castle);
-        println!("castle type: {}", move_info.castle_type);
-        println!("promotion: {}", move_info.promotion);
-        println!("promotion piece: {}", TEMPTEMPTEMP(move_info.promotion_piece));
-        println!("destination square: {}", move_info.destination);
-        println!("disambiguation: {}", move_info.disambiguation);
-        println!("piece moved: {}", TEMPTEMPTEMP(move_info.piece_moved));
-        println!("invalidity explanation: {}", move_info.invalidity_explanation);
+        // println!("valid notation: {}", move_info.valid_notation);
+        // println!("valid move: {}", move_info.valid_move);
+        // println!("en passant: {}", move_info.en_passant);
+        // println!("check: {}", move_info.check);
+        // println!("mate: {}", move_info.mate);
+        // println!("capture: {}", move_info.capture);
+        // println!("castle: {}", move_info.castle);
+        // println!("castle type: {}", move_info.castle_type);
+        // println!("promotion: {}", move_info.promotion);
+        // println!("promotion piece: {}", TEMPTEMPTEMP(move_info.promotion_piece));
+        // println!("destination square: {}", move_info.destination);
+        // println!("disambiguation: {}", move_info.disambiguation);
+        // println!("piece moved: {}", TEMPTEMPTEMP(move_info.piece_moved));
+        // println!("invalidity explanation: {}", move_info.invalidity_explanation);
     }
 }
 
@@ -101,17 +102,19 @@ mod chess {
     pub struct MoveInfo {  // the only things we need are origin square and destination square, everything else it to make sure the player wrote a correct notation, not to make the move (though it does help)
         pub valid_notation: bool,
         pub valid_move: bool,
-        pub en_passant: bool,
-        pub check: bool,
-        pub mate: bool,
-        pub capture: bool,
-        pub castle: bool,
-        pub castle_type: u8,  // 0 - short, 1 - long
-        pub promotion: bool,
-        pub promotion_piece: PieceType,
-        pub destination: String,
-        pub disambiguation: String,  // if the user provided the origin square that is
-        pub piece_moved: PieceType,
+        en_passant: bool,
+        check: bool,
+        mate: bool,
+        capture: bool,
+        castle: bool,
+        castle_type: u8,  // 0 - short, 1 - long
+        promotion: bool,
+        promotion_piece: PieceType,
+        destination: String,
+        destination_pos: [usize; 2],
+        disambiguation: String,  // if the user provided the origin square that is
+        oritin_pos: [usize; 2],
+        piece_moved: PieceType,
         pub invalidity_explanation: String
     }
 
@@ -167,7 +170,7 @@ mod chess {
     }
 
 
-    // validating moves
+    // validating move
     pub fn get_move_information(chess_move: String, board: &Board, current_turn: bool) -> MoveInfo {
         let mut move_info: MoveInfo = MoveInfo {
             valid_notation: true, // we assume they are correct until we stumble across irregularities
@@ -181,7 +184,9 @@ mod chess {
             promotion: false,
             promotion_piece: PieceType::Empty,
             destination: String::from(""),
+            destination_pos: [0, 0],
             disambiguation: String::from(""),
+            oritin_pos: [0, 0],
             piece_moved: PieceType::Empty,
             invalidity_explanation: String::new()
         };
@@ -332,6 +337,22 @@ mod chess {
             _ => PieceType::Empty
         }
     }
+
+    fn validate_move(move_info: &mut MoveInfo, board: &mut Board) {
+        let legal = is_legal(move_info, board);
+    }
+
+    fn is_legal(move_info: &mut MoveInfo, board: &mut Board) -> bool {
+        let legal = true;
+
+        // general piece moving mechanics
+
+
+        return legal;
+    }
+
+    
+
 }
 
 mod utils {
