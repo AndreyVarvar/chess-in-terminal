@@ -14,6 +14,7 @@ fn main() {
         let chess_move: String = utils::input("Enter a move: ");
         let move_info: chess::MoveInfo = chess::get_move_information(chess_move, &board, current_turn);
 
+        // debugging
         println!("valid notation: {}", move_info.valid_notation);
         println!("valid move: {}", move_info.valid_move);
         println!("en passant: {}", move_info.en_passant);
@@ -24,13 +25,14 @@ fn main() {
         println!("castle type: {}", move_info.castle_type);
         println!("promotion: {}", move_info.promotion);
         println!("promotion piece: {}", TEMPTEMPTEMP(move_info.promotion_piece));
-        println!("destination square: {}", move_info.destination_square);
-        println!("origin square: {}", move_info.origin_square);
+        println!("destination square: {}", move_info.destination);
+        println!("disambiguation: {}", move_info.disambiguation);
         println!("piece moved: {}", TEMPTEMPTEMP(move_info.piece_moved));
         println!("invalidity explanation: {}", move_info.invalidity_explanation);
     }
 }
 
+// debugging purposes
 fn TEMPTEMPTEMP(piece: chess::PieceType) -> String {
     match piece {
         chess::PieceType::Pawn => "pawn".to_string(),
@@ -44,7 +46,7 @@ fn TEMPTEMPTEMP(piece: chess::PieceType) -> String {
 }
 
 mod chess {
-    use crate::TEMPTEMPTEMP;
+    use crate::utils;
 
     const WHITE_PIECES: [char; 6] = ['♚', '♛', '♜', '♞', '♝', '♟'];
     const BLACK_PIECES: [char; 6] = ['♔', '♕', '♖', '♘', '♗', '♙'];
@@ -107,8 +109,8 @@ mod chess {
         pub castle_type: u8,  // 0 - short, 1 - long
         pub promotion: bool,
         pub promotion_piece: PieceType,
-        pub destination_square: String,
-        pub origin_square: String,  // if the user provided the origin square that is
+        pub destination: String,
+        pub disambiguation: String,  // if the user provided the origin square that is
         pub piece_moved: PieceType,
         pub invalidity_explanation: String
     }
@@ -140,7 +142,7 @@ mod chess {
         println!();
     }
 
-    pub fn get_piece_char(piece: Piece) -> char {
+    fn get_piece_char(piece: Piece) -> char {
         if (piece.color == true) {
             match (piece.piece_type) {
                 PieceType::King => WHITE_PIECES[0],
@@ -178,13 +180,13 @@ mod chess {
             castle_type: 0,
             promotion: false,
             promotion_piece: PieceType::Empty,
-            destination_square: String::from("imagination square"),
-            origin_square: String::from("4th dimension"),
+            destination: String::from(""),
+            disambiguation: String::from(""),
             piece_moved: PieceType::Empty,
             invalidity_explanation: String::new()
         };
 
-        get_move_notation_information(chess_move, &mut move_info); // get's information out of the notation, such as origin and destination squares
+        get_move_notation_information(chess_move, &mut move_info); // get's information out of the notation player gave us, such as origin and destination squares
         validate_move_notation(&mut move_info);
 
 
@@ -192,7 +194,7 @@ mod chess {
     }
 
     fn validate_move_notation(move_notation_info: &mut MoveInfo) {
-        // this function balidates the correctness of the notation structure, not of the move itself
+        // this function validates the correctness of the notation structure, not of the move itself
         // we find all of the combinations that should not be present in a single notation. For example promotion and en passant.
 
         if move_notation_info.en_passant == true { 
@@ -204,7 +206,6 @@ mod chess {
 
         if move_notation_info.check == true {
             if move_notation_info.mate == true { move_notation_info.valid_notation = false; move_notation_info.invalidity_explanation = "You can't specify both 'check' and 'mate' in a single notation".to_string() }
-            if move_notation_info.capture == false { move_notation_info.valid_notation = false; move_notation_info.invalidity_explanation = "En passant is considered a capture. Put 'x' before destination square".to_string() }
         }
 
         if move_notation_info.capture == true {
@@ -213,6 +214,60 @@ mod chess {
 
         if move_notation_info.castle == true {
             if move_notation_info.promotion == true { move_notation_info.valid_notation = false; move_notation_info.invalidity_explanation = "Can't promote while castling".to_string() }
+        }
+    
+        // check if destination square is valid
+        if (char_letter_to_pos_on_board(utils::get_nth(&move_notation_info.destination, 0)) == -1) || (char_int_to_pos_on_board(utils::get_nth(&move_notation_info.destination, 1)) == -1) {
+            move_notation_info.valid_notation = false;
+            move_notation_info.invalidity_explanation = "Destination square has structure {a-h}{1-8}".to_string();
+        }
+
+        // here we check if disambiguation is correct
+        if move_notation_info.disambiguation.len() > 0 {  // disambiguation was specified
+            if move_notation_info.disambiguation.len() > 2 {
+                move_notation_info.valid_notation = false;
+                move_notation_info.invalidity_explanation = "Disambiguation is messed up".to_string();
+            }
+
+            else if move_notation_info.disambiguation.len() == 2 {
+                if (char_letter_to_pos_on_board(utils::get_nth(&move_notation_info.disambiguation, 0)) == -1) || (char_int_to_pos_on_board(utils::get_nth(&move_notation_info.disambiguation, 1)) == -1) {
+                    move_notation_info.valid_notation = false;
+                    move_notation_info.invalidity_explanation = "Disambiguation has structure '{a-h}{1-8}'".to_string();
+                }
+            } else {
+                if (char_letter_to_pos_on_board(utils::get_nth(&move_notation_info.disambiguation, 0)) == -1) && (char_int_to_pos_on_board(utils::get_nth(&move_notation_info.disambiguation, 0)) == -1) {
+                    move_notation_info.valid_notation = false;
+                    move_notation_info.invalidity_explanation = "Disambiguation file/rank index must be on the board".to_string();
+                }
+            }
+        }
+    }
+
+    fn char_letter_to_pos_on_board(c: char) -> i8 {
+        match c {
+            'a' => 0,
+            'b' => 1,
+            'c' => 2,
+            'd' => 3,
+            'e' => 4,
+            'f' => 5,
+            'g' => 6,
+            'h' => 7,
+            _ => -1
+        }
+    }
+
+    fn char_int_to_pos_on_board(i: char) -> i8 {
+        match i {
+            '1' => 0,
+            '2' => 1,
+            '3' => 2,
+            '4' => 3,
+            '5' => 4,
+            '6' => 5,
+            '7' => 6,
+            '8' => 7,
+            _ => -1
         }
     }
 
@@ -242,9 +297,9 @@ mod chess {
         } else {
             // by this point the last 2 chars absolutelly MUST be the destination square.
             if chess_move.len() >= 2 {
-                move_info.destination_square = chess_move.chars().last().unwrap().to_string();  // i couldnt find a better way to get the last 2 chars from the string
+                move_info.destination = chess_move.chars().last().unwrap().to_string();  // i couldnt find a better way to get the last 2 chars from the string
                 chess_move.truncate(chess_move.len() - 1);
-                move_info.destination_square.insert(0, chess_move.chars().last().unwrap());
+                move_info.destination.insert(0, chess_move.chars().last().unwrap());
                 chess_move.truncate(chess_move.len() - 1);
             }
 
@@ -263,7 +318,7 @@ mod chess {
             }
 
             // now, all that is left is the optional disambiguating notation
-            move_info.origin_square = chess_move;
+            move_info.disambiguation = chess_move;
         }
     }
 
@@ -283,6 +338,10 @@ mod utils {
     use std::io;
     use std::io::Write;
 
+    pub fn get_nth(str: &String, n: usize) -> char {
+        // absolutelly must make sure n < str.len()!!!!!
+        return str.chars().nth(n).unwrap();
+    }
 
     pub fn input(text: &str) -> String {
         // similar to python's input function
