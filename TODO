@@ -1,5 +1,9 @@
-if destination square / origin squares are valid notation, generate tehe position for them
-
 check if a move is legal
+ - check if a piece is findable (enough disambiguation was provided)
+ - check if the move is possible
+    - check if the piece can move there (that piece can physically get there)
+    - check if the path there is not blocked (for sliding pieces)
+    - check if the destination square isnt bloked by your own piece
+    - check if it doesnt leave your king for capture
 
 other chess stuff

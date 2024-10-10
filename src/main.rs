@@ -222,9 +222,14 @@ mod chess {
         }
     
         // check if destination square is valid
-        if (char_letter_to_pos_on_board(utils::get_nth(&move_notation_info.destination, 0)) == -1) || (char_int_to_pos_on_board(utils::get_nth(&move_notation_info.destination, 1)) == -1) {
+        if (char_letter_to_pos_on_board(utils::get_nth(&move_notation_info.destination, 0)) == 9) || (char_int_to_pos_on_board(utils::get_nth(&move_notation_info.destination, 1)) == 9) {
             move_notation_info.valid_notation = false;
             move_notation_info.invalidity_explanation = "Destination square has structure {a-h}{1-8}".to_string();
+        } else {
+            move_notation_info.destination_pos = [
+                char_letter_to_pos_on_board(utils::get_nth(&move_notation_info.destination, 0)) as usize,
+                char_int_to_pos_on_board(utils::get_nth(&move_notation_info.destination, 1)) as usize
+            ];
         }
 
         // here we check if disambiguation is correct
@@ -235,20 +240,30 @@ mod chess {
             }
 
             else if move_notation_info.disambiguation.len() == 2 {
-                if (char_letter_to_pos_on_board(utils::get_nth(&move_notation_info.disambiguation, 0)) == -1) || (char_int_to_pos_on_board(utils::get_nth(&move_notation_info.disambiguation, 1)) == -1) {
+                if (char_letter_to_pos_on_board(utils::get_nth(&move_notation_info.disambiguation, 0)) == 9) || (char_int_to_pos_on_board(utils::get_nth(&move_notation_info.disambiguation, 1)) == 9) {
                     move_notation_info.valid_notation = false;
                     move_notation_info.invalidity_explanation = "Disambiguation has structure '{a-h}{1-8}'".to_string();
+                } else {
+                    move_notation_info.destination_pos = [
+                        char_letter_to_pos_on_board(utils::get_nth(&move_notation_info.destination, 0)) as usize,
+                        char_int_to_pos_on_board(utils::get_nth(&move_notation_info.destination, 1)) as usize
+                    ];
                 }
             } else {
-                if (char_letter_to_pos_on_board(utils::get_nth(&move_notation_info.disambiguation, 0)) == -1) && (char_int_to_pos_on_board(utils::get_nth(&move_notation_info.disambiguation, 0)) == -1) {
+                if (char_letter_to_pos_on_board(utils::get_nth(&move_notation_info.disambiguation, 0)) == 9) && (char_int_to_pos_on_board(utils::get_nth(&move_notation_info.disambiguation, 0)) == 9) {
                     move_notation_info.valid_notation = false;
                     move_notation_info.invalidity_explanation = "Disambiguation file/rank index must be on the board".to_string();
+                } else {
+                    move_notation_info.destination_pos = [
+                        char_letter_to_pos_on_board(utils::get_nth(&move_notation_info.destination, 0)) as usize,
+                        char_int_to_pos_on_board(utils::get_nth(&move_notation_info.destination, 1)) as usize
+                    ];
                 }
             }
         }
     }
 
-    fn char_letter_to_pos_on_board(c: char) -> i8 {
+    fn char_letter_to_pos_on_board(c: char) -> u8 {
         match c {
             'a' => 0,
             'b' => 1,
@@ -258,11 +273,11 @@ mod chess {
             'f' => 5,
             'g' => 6,
             'h' => 7,
-            _ => -1
+            _ => 9
         }
     }
 
-    fn char_int_to_pos_on_board(i: char) -> i8 {
+    fn char_int_to_pos_on_board(i: char) -> u8 {
         match i {
             '1' => 0,
             '2' => 1,
@@ -272,7 +287,7 @@ mod chess {
             '6' => 5,
             '7' => 6,
             '8' => 7,
-            _ => -1
+            _ => 9
         }
     }
 
